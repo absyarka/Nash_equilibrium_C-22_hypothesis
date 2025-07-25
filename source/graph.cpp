@@ -52,7 +52,7 @@ bool Game::SatisfiesC22() const
             {
                 continue;
             }
-            if (graph.is_terminal[o] && pref > preferences[i].at(-1))
+            if (graph.is_terminal[o] && pref < preferences[i].at(-1))
             {
                 k++;
             }
