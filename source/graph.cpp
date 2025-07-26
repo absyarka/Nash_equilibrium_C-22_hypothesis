@@ -19,8 +19,7 @@ constexpr const long long BAD_MASKS[] = {
     (1LL << 0) | (1LL << 4) | (1LL << 8) | (1LL << 12),
     (1LL << 0) | (1LL << 5) | (1LL << 10) | (1LL << 15) | (1LL << 20),
     (1LL << 0) | (1LL << 6) | (1LL << 12) | (1LL << 18) | (1LL << 24) | (1LL << 30),
-    (1LL << 0) | (1LL << 7) | (1LL << 14) | (1LL << 21) | (1LL << 28) | (1LL << 35) | (1LL << 42)
-};
+    (1LL << 0) | (1LL << 7) | (1LL << 14) | (1LL << 21) | (1LL << 28) | (1LL << 35) | (1LL << 42)};
 
 Graph::Graph(vector<vector<int>> adjacency_list) : g(adjacency_list)
 {
@@ -83,7 +82,8 @@ bool Game::IsNE(const map<int, int> &strategy) const
     return true;
 }
 
-bool Game::HasNE() const {
+bool Game::HasNE() const
+{
     bool has_NE = false;
     for (const auto &strategy : GetAllStrategies())
     {
@@ -187,9 +187,11 @@ void Game::Print() const
             cout << u << ' ';
             out << u << ' ';
         }
+        cout << '\n';
+        out << '\n';
     }
-    cout << "\nPlayer count: " << player_count << "\nPreferences:\n";
-    out << "\nPlayer count: " << player_count << "\nPreferences:\n";
+    cout << "Player count: " << player_count << "\nPreferences:\n";
+    out << "Player count: " << player_count << "\nPreferences:\n";
     for (int i = 0; i < preferences.size(); ++i)
     {
         cout << i << " : ";
@@ -297,12 +299,17 @@ namespace graph
         return g;
     }
 
-    long long graphToMask(const vector<vector<int>>& g) {
+    long long graphToMask(const vector<vector<int>> &g)
+    {
         long long mask = 0;
         int id = 0;
-        for (int v = 0; v < g.size(); ++v) {
-            for (int u = 0; u < g.size(); ++u) {
-                if (ranges::any_of(g[v], [u](int el) { return el == u; })) {
+        for (int v = 0; v < g.size(); ++v)
+        {
+            for (int u = 0; u < g.size(); ++u)
+            {
+                if (ranges::any_of(g[v], [u](int el)
+                                   { return el == u; }))
+                {
                     mask |= (1LL << id);
                 }
                 id++;
@@ -524,7 +531,7 @@ namespace graph
 namespace game
 {
 
-    void generateGamesByGraphWithPreferences(const Graph &graph, int player_count, vector<map<int, int>> &preferences, vector<set<int>> &control, int index)
+    void generateGamesByGraphWithPreferences(const Graph &graph, int player_count, vector<map<int, int>> &preferences, vector<set<int>> &control, bool check_C22, int index)
     {
         if (index == graph.non_terminals.size())
         {
@@ -540,7 +547,7 @@ namespace game
                     }
                 }
                 Game game(player_count, graph, preferences, control_);
-                if (!game.SatisfiesC22())
+                if (check_C22 && !game.SatisfiesC22())
                 {
                     return;
                 }
@@ -555,12 +562,12 @@ namespace game
         for (int i = 0; i < player_count; ++i)
         {
             control[i].insert(graph.non_terminals[index]);
-            generateGamesByGraphWithPreferences(graph, player_count, preferences, control, index + 1);
+            generateGamesByGraphWithPreferences(graph, player_count, preferences, control, check_C22, index + 1);
             control[i].erase(graph.non_terminals[index]);
         }
     }
 
-    void generateGamesByGraph(const Graph &graph, int player_count, vector<map<int, int>> &preferences, int player)
+    void generateGamesByGraph(const Graph &graph, int player_count, vector<map<int, int>> &preferences, bool check_C22, int player)
     {
         if (player_count > graph.non_terminals.size())
         {
@@ -569,7 +576,7 @@ namespace game
         if (player == -1)
         {
             preferences.resize(player_count);
-            generateGamesByGraph(graph, player_count, preferences, player + 1);
+            generateGamesByGraph(graph, player_count, preferences, check_C22, player + 1);
             return;
         }
         vector<int> outcomes = graph.terminals;
@@ -584,16 +591,16 @@ namespace game
             if (player + 1 == player_count)
             {
                 vector<set<int>> control(player_count);
-                game::generateGamesByGraphWithPreferences(graph, player_count, preferences, control);
+                game::generateGamesByGraphWithPreferences(graph, player_count, preferences, control, check_C22);
             }
             else
             {
-                generateGamesByGraph(graph, player_count, preferences, player + 1);
+                generateGamesByGraph(graph, player_count, preferences, check_C22, player + 1);
             }
         } while (next_permutation(outcomes.begin(), outcomes.end()));
     }
 
-    void searchForCounterexample(int player_count, int n)
+    void searchForCounterexample(int player_count, int n, bool check_C22)
     {
         const string filename = "graphs_" + to_string(n) + ".txt";
         ifstream in(filename);
@@ -615,7 +622,7 @@ namespace game
                 for (int i = num_thread; i < masks.size(); i += thread_cnt) {
                     Graph gr(graph::maskToGraph(n, masks[i]));
                     vector<map<int, int>> prefs;
-                    game::generateGamesByGraph(gr, player_count, prefs);
+                    game::generateGamesByGraph(gr, player_count, prefs, check_C22);
                     ++cnt;
                     if (cnt % 10000 == 0) {
                         lock_guard<mutex> lock(m);

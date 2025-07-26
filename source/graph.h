@@ -52,7 +52,7 @@ namespace graph
 
     vector<vector<int>> maskToGraph(int n, long long mask);
 
-    long long graphToMask(const vector<vector<int>>& g);
+    long long graphToMask(const vector<vector<int>> &g);
 
     bool checkGraphContainsTwoTerminalVertices(const vector<vector<int>> &g);
 
@@ -69,10 +69,10 @@ namespace graph
 namespace game
 {
 
-    void generateGamesByGraphWithPreferences(const Graph &graph, int player_count, vector<map<int, int>> &preferences, vector<set<int>> &control, int index=0);
+    void generateGamesByGraphWithPreferences(const Graph &graph, int player_count, vector<map<int, int>> &preferences, vector<set<int>> &control, bool check_C22, int index = 0);
 
-    void generateGamesByGraph(const Graph &graph, int player_count, vector<map<int, int>> &preferences, int player = -1);
+    void generateGamesByGraph(const Graph &graph, int player_count, vector<map<int, int>> &preferences, bool check_C22, int player = -1);
 
-    void searchForCounterexample(int player_count, int n);
+    void searchForCounterexample(int player_count, int n, bool check_C22 = true);
 
 } // namespace game
